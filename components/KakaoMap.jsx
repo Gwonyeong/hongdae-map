@@ -54,28 +54,49 @@ const KakaoMap = forwardRef(({ places = [], onMarkerClick, session }, ref) => {
       selectedLocationMarker.setMap(null);
     }
 
-    // 새로운 빨간 점 마커 생성
+    // 새로운 빨간 점과 화살표 마커 생성
     const redDotMarker = new window.kakao.maps.CustomOverlay({
       position: position,
       content: `
-        <div style="
-          width: 20px;
-          height: 20px;
-          background: #ef4444;
-          border: 3px solid white;
-          border-radius: 50%;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-          animation: pulse 2s infinite;
-        "></div>
+        <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+          <!-- 화살표 -->
+          <div style="
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 40px solid #ef4444;
+            margin-bottom: -2px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            animation: bounce 1.5s infinite;
+          "></div>
+
+          <!-- 빨간 점 -->
+          <div style="
+            width: 24px;
+            height: 24px;
+            background: #ef4444;
+            border: 4px solid white;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            animation: pulse 2s infinite;
+          "></div>
+        </div>
+
         <style>
           @keyframes pulse {
             0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 0.8; }
             100% { transform: scale(1); opacity: 1; }
+          }
+
+          @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
           }
         </style>
       `,
-      yAnchor: 0.5,
+      yAnchor: 1,
       xAnchor: 0.5,
     });
 
