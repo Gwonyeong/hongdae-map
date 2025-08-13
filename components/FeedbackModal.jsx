@@ -3,11 +3,9 @@
 import { useState } from "react";
 
 const FEEDBACK_SUBJECTS = [
-  { value: "bug", label: "버그 신고" },
-  { value: "feature", label: "기능 요청" },
-  { value: "ui", label: "UI/UX 개선" },
-  { value: "performance", label: "성능 문제" },
-  { value: "content", label: "콘텐츠 문제" },
+  { value: "feature", label: "새로운 기능 제안" },
+  { value: "advertisement", label: "광고 문의 (현재 무료!)" },
+  { value: "report", label: "콘텐츠 신고" },
   { value: "other", label: "기타" },
 ];
 
@@ -159,6 +157,9 @@ export default function FeedbackModal({ isOpen, onClose, session }) {
               />
               <div className="text-right text-xs text-gray-500">
                 {content.length}/1000
+              </div>
+              <div className="text-sm text-green-600 mt-2">
+                💬 로그인 하신 메일로 답장드릴게요
               </div>
             </div>
 
