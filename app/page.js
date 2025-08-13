@@ -24,6 +24,79 @@ export default function Home() {
   const [showUserSettings, setShowUserSettings] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // 브라우저 뒤로가기 처리
+  useEffect(() => {
+    const handlePopState = (event) => {
+      // 현재 열린 모달들을 확인하고 닫기
+      if (showReviewForm) {
+        setShowReviewForm(false);
+        setSelectedPlace(null);
+        if (mapRef.current) {
+          mapRef.current.removeSelectedLocationMarker();
+        }
+        return;
+      }
+
+      if (showLocationConfirm) {
+        setShowLocationConfirm(false);
+        setSelectedPlace(null);
+        if (mapRef.current) {
+          mapRef.current.removeSelectedLocationMarker();
+        }
+        return;
+      }
+
+      if (showSearchModal) {
+        setShowSearchModal(false);
+        return;
+      }
+
+      if (showUserSettings) {
+        setShowUserSettings(false);
+        return;
+      }
+
+      if (showLoginModal) {
+        setShowLoginModal(false);
+        return;
+      }
+
+      if (showBottomSheet) {
+        setShowBottomSheet(false);
+        setSelectedPlaceForSheet(null);
+        return;
+      }
+    };
+
+    // 모달이 열릴 때 히스토리에 상태 추가
+    const addHistoryState = () => {
+      if (
+        showReviewForm ||
+        showLocationConfirm ||
+        showSearchModal ||
+        showUserSettings ||
+        showLoginModal ||
+        showBottomSheet
+      ) {
+        window.history.pushState({ modal: true }, "");
+      }
+    };
+
+    addHistoryState();
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [
+    showReviewForm,
+    showLocationConfirm,
+    showSearchModal,
+    showUserSettings,
+    showLoginModal,
+    showBottomSheet,
+  ]);
+
   useEffect(() => {
     fetchReviews();
   }, []);
@@ -52,12 +125,14 @@ export default function Home() {
     // 위치 확인 모달 표시
     setTimeout(() => {
       setShowLocationConfirm(true);
+      window.history.pushState({ modal: "locationConfirm" }, "");
     }, 500); // 지도 이동 애니메이션 후 모달 표시
   };
 
   const handleLocationConfirm = () => {
     setShowLocationConfirm(false);
     setShowReviewForm(true);
+    window.history.pushState({ modal: "reviewForm" }, "");
     // 빨간 점 마커 제거
     if (mapRef.current) {
       mapRef.current.removeSelectedLocationMarker();
@@ -68,6 +143,7 @@ export default function Home() {
     setShowLocationConfirm(false);
     setSelectedPlace(null);
     setShowSearchModal(true);
+    window.history.pushState({ modal: "searchModal" }, "");
     // 빨간 점 마커 제거
     if (mapRef.current) {
       mapRef.current.removeSelectedLocationMarker();
@@ -102,16 +178,25 @@ export default function Home() {
   const handleCancel = () => {
     setShowReviewForm(false);
     setSelectedPlace(null);
+    // 히스토리에서 모달 상태 제거
+    if (window.history.state?.modal) {
+      window.history.back();
+    }
   };
 
   const handleMarkerClick = (place) => {
     setSelectedPlaceForSheet(place);
     setShowBottomSheet(true);
+    window.history.pushState({ modal: "bottomSheet" }, "");
   };
 
   const handleBottomSheetClose = () => {
     setShowBottomSheet(false);
     setSelectedPlaceForSheet(null);
+    // 히스토리에서 모달 상태 제거
+    if (window.history.state?.modal) {
+      window.history.back();
+    }
   };
 
   const handleReviewDeleted = async (reviewId) => {
@@ -144,13 +229,40 @@ export default function Home() {
   const handleAddButtonClick = () => {
     if (!session) {
       setShowLoginModal(true);
+      window.history.pushState({ modal: "loginModal" }, "");
     } else {
       setShowSearchModal(true);
+      window.history.pushState({ modal: "searchModal" }, "");
     }
   };
 
   const handleLoginModalClose = () => {
     setShowLoginModal(false);
+    // 히스토리에서 모달 상태 제거
+    if (window.history.state?.modal) {
+      window.history.back();
+    }
+  };
+
+  const handleUserSettingsOpen = () => {
+    setShowUserSettings(true);
+    window.history.pushState({ modal: "userSettings" }, "");
+  };
+
+  const handleUserSettingsClose = () => {
+    setShowUserSettings(false);
+    // 히스토리에서 모달 상태 제거
+    if (window.history.state?.modal) {
+      window.history.back();
+    }
+  };
+
+  const handleSearchModalClose = () => {
+    setShowSearchModal(false);
+    // 히스토리에서 모달 상태 제거
+    if (window.history.state?.modal) {
+      window.history.back();
+    }
   };
 
   if (loading) {
@@ -198,7 +310,7 @@ export default function Home() {
                 </div>
                 {/* 환경설정 버튼 */}
                 <button
-                  onClick={() => setShowUserSettings(true)}
+                  onClick={handleUserSettingsOpen}
                   className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
                   title="사용자 설정"
                 >
@@ -240,13 +352,13 @@ export default function Home() {
         <>
           <div
             className="fixed inset-0 bg-black/50 z-40"
-            onClick={() => setShowSearchModal(false)}
+            onClick={handleSearchModalClose}
           />
           <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
             <div className="w-full max-w-md">
               <PlaceSearch
                 onPlaceSelect={handlePlaceSelect}
-                onClose={() => setShowSearchModal(false)}
+                onClose={handleSearchModalClose}
               />
             </div>
           </div>
@@ -315,7 +427,7 @@ export default function Home() {
       {/* 유저 설정 모달 */}
       <UserSettingsModal
         isOpen={showUserSettings}
-        onClose={() => setShowUserSettings(false)}
+        onClose={handleUserSettingsClose}
         session={session}
       />
 
