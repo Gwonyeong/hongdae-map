@@ -15,17 +15,77 @@ const KakaoMap = forwardRef(({ places = [], onMarkerClick, session }, ref) => {
   const [markers, setMarkers] = useState([]);
   const [currentZoomLevel, setCurrentZoomLevel] = useState(4);
   const [eventListeners, setEventListeners] = useState([]);
+  const [selectedLocationMarker, setSelectedLocationMarker] = useState(null);
 
   // 외부에서 지도 이동을 호출할 수 있도록 ref 노출
   useImperativeHandle(ref, () => ({
     moveToLocation: (latitude, longitude, zoomLevel = 3) => {
       if (map) {
         const moveLatLon = new window.kakao.maps.LatLng(latitude, longitude);
-        map.setCenter(moveLatLon);
+
+        // 화면 상단 2/3 지점에 위치하도록 offset 계산
+        const mapSize = map.getSize();
+        const offsetY = mapSize.height * 0.17; // 상단에서 2/3 지점 (17% 정도 아래로)
+
+        // 픽셀 좌표로 변환하여 offset 적용
+        const projection = map.getProjection();
+        const point = projection.pointFromCoords(moveLatLon);
+        const offsetPoint = new window.kakao.maps.Point(
+          point.x,
+          point.y - offsetY
+        );
+        const offsetLatLon = projection.coordsFromPoint(offsetPoint);
+
+        map.setCenter(offsetLatLon);
         map.setLevel(zoomLevel);
+
+        // 빨간 점 마커 추가
+        addSelectedLocationMarker(moveLatLon);
+      }
+    },
+    removeSelectedLocationMarker: () => {
+      if (selectedLocationMarker) {
+        selectedLocationMarker.setMap(null);
+        setSelectedLocationMarker(null);
       }
     },
   }));
+
+  // 선택된 위치에 빨간 점 마커 추가
+  const addSelectedLocationMarker = (position) => {
+    // 기존 빨간 점 마커 제거
+    if (selectedLocationMarker) {
+      selectedLocationMarker.setMap(null);
+    }
+
+    // 새로운 빨간 점 마커 생성
+    const redDotMarker = new window.kakao.maps.CustomOverlay({
+      position: position,
+      content: `
+        <div style="
+          width: 20px;
+          height: 20px;
+          background: #ef4444;
+          border: 3px solid white;
+          border-radius: 50%;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          animation: pulse 2s infinite;
+        "></div>
+        <style>
+          @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+          }
+        </style>
+      `,
+      yAnchor: 0.5,
+      xAnchor: 0.5,
+    });
+
+    redDotMarker.setMap(map);
+    setSelectedLocationMarker(redDotMarker);
+  };
 
   const initializeMap = () => {
     if (!window.kakao || !window.kakao.maps) return;

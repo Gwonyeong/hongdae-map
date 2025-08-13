@@ -58,12 +58,20 @@ export default function Home() {
   const handleLocationConfirm = () => {
     setShowLocationConfirm(false);
     setShowReviewForm(true);
+    // 빨간 점 마커 제거
+    if (mapRef.current) {
+      mapRef.current.removeSelectedLocationMarker();
+    }
   };
 
   const handleLocationCancel = () => {
     setShowLocationConfirm(false);
     setSelectedPlace(null);
     setShowSearchModal(true);
+    // 빨간 점 마커 제거
+    if (mapRef.current) {
+      mapRef.current.removeSelectedLocationMarker();
+    }
   };
 
   const handleReviewSubmit = async (reviewData) => {
