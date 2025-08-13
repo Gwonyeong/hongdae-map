@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function PlaceSearch({ onPlaceSelect }) {
+export default function PlaceSearch({ onPlaceSelect, onClose }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -56,7 +56,7 @@ export default function PlaceSearch({ onPlaceSelect }) {
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-lg">
+    <div className="bg-white p-4 rounded-lg shadow-lg relative">
       <div className="mb-4">
         <input
           type="text"
@@ -98,6 +98,31 @@ export default function PlaceSearch({ onPlaceSelect }) {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* X 버튼 */}
+      {onClose && (
+        <div className="flex justify-center mt-4 pt-3 border-t border-gray-200">
+          <button
+            onClick={onClose}
+            className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
+            title="닫기"
+          >
+            <svg
+              className="w-6 h-6 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
         </div>
       )}
     </div>

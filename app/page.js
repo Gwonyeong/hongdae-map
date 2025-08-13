@@ -213,7 +213,10 @@ export default function Home() {
           />
           <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
             <div className="w-full max-w-md">
-              <PlaceSearch onPlaceSelect={handlePlaceSelect} />
+              <PlaceSearch
+                onPlaceSelect={handlePlaceSelect}
+                onClose={() => setShowSearchModal(false)}
+              />
             </div>
           </div>
         </>
