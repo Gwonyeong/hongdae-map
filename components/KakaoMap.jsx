@@ -1,14 +1,31 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useImperativeHandle,
+  forwardRef,
+} from "react";
 import Script from "next/script";
 
-export default function KakaoMap({ places = [], onMarkerClick, session }) {
+const KakaoMap = forwardRef(({ places = [], onMarkerClick, session }, ref) => {
   const mapContainer = useRef(null);
   const [map, setMap] = useState(null);
   const [markers, setMarkers] = useState([]);
   const [currentZoomLevel, setCurrentZoomLevel] = useState(4);
   const [eventListeners, setEventListeners] = useState([]);
+
+  // 외부에서 지도 이동을 호출할 수 있도록 ref 노출
+  useImperativeHandle(ref, () => ({
+    moveToLocation: (latitude, longitude, zoomLevel = 3) => {
+      if (map) {
+        const moveLatLon = new window.kakao.maps.LatLng(latitude, longitude);
+        map.setCenter(moveLatLon);
+        map.setLevel(zoomLevel);
+      }
+    },
+  }));
 
   const initializeMap = () => {
     if (!window.kakao || !window.kakao.maps) return;
@@ -368,4 +385,6 @@ export default function KakaoMap({ places = [], onMarkerClick, session }) {
       <div ref={mapContainer} className="w-full h-full" />
     </>
   );
-}
+});
+
+export default KakaoMap;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
 import KakaoMap from "@/components/KakaoMap";
 import PlaceSearch from "@/components/PlaceSearch";
@@ -8,13 +8,16 @@ import ReviewForm from "@/components/ReviewForm";
 import BottomSheet from "@/components/BottomSheet";
 import LoginModal from "@/components/LoginModal";
 import UserSettingsModal from "@/components/UserSettingsModal";
+import LocationConfirmModal from "@/components/LocationConfirmModal";
 
 export default function Home() {
   const { data: session, status } = useSession();
+  const mapRef = useRef(null);
   const [places, setPlaces] = useState([]);
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [showLocationConfirm, setShowLocationConfirm] = useState(false);
   const [selectedPlaceForSheet, setSelectedPlaceForSheet] = useState(null);
   const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -39,8 +42,28 @@ export default function Home() {
 
   const handlePlaceSelect = (place) => {
     setSelectedPlace(place);
-    setShowReviewForm(true);
     setShowSearchModal(false);
+
+    // 지도를 선택한 위치로 이동
+    if (mapRef.current) {
+      mapRef.current.moveToLocation(place.latitude, place.longitude, 2);
+    }
+
+    // 위치 확인 모달 표시
+    setTimeout(() => {
+      setShowLocationConfirm(true);
+    }, 500); // 지도 이동 애니메이션 후 모달 표시
+  };
+
+  const handleLocationConfirm = () => {
+    setShowLocationConfirm(false);
+    setShowReviewForm(true);
+  };
+
+  const handleLocationCancel = () => {
+    setShowLocationConfirm(false);
+    setSelectedPlace(null);
+    setShowSearchModal(true);
   };
 
   const handleReviewSubmit = async (reviewData) => {
@@ -222,6 +245,14 @@ export default function Home() {
         </>
       )}
 
+      {/* 위치 확인 모달 */}
+      <LocationConfirmModal
+        isOpen={showLocationConfirm}
+        place={selectedPlace}
+        onConfirm={handleLocationConfirm}
+        onCancel={handleLocationCancel}
+      />
+
       {/* 리뷰 작성 폼 모달 */}
       {showReviewForm && selectedPlace && (
         <>
@@ -242,6 +273,7 @@ export default function Home() {
       {/* 지도 영역 */}
       <main className="h-full">
         <KakaoMap
+          ref={mapRef}
           places={places}
           onMarkerClick={handleMarkerClick}
           session={session}
