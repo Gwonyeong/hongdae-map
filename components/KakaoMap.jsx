@@ -464,4 +464,6 @@ const KakaoMap = forwardRef(({ places = [], onMarkerClick, session }, ref) => {
   );
 });
 
+KakaoMap.displayName = "KakaoMap";
+
 export default KakaoMap;
