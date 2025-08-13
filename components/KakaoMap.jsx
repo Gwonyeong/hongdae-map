@@ -24,20 +24,16 @@ const KakaoMap = forwardRef(({ places = [], onMarkerClick, session }, ref) => {
         const moveLatLon = new window.kakao.maps.LatLng(latitude, longitude);
 
         // 화면 상단 2/3 지점에 위치하도록 offset 계산
-        const mapSize = map.getSize();
-        const offsetY = mapSize.height * 0.17; // 상단에서 2/3 지점 (17% 정도 아래로)
-
-        // 픽셀 좌표로 변환하여 offset 적용
-        const projection = map.getProjection();
-        const point = projection.pointFromCoords(moveLatLon);
-        const offsetPoint = new window.kakao.maps.Point(
-          point.x,
-          point.y - offsetY
-        );
-        const offsetLatLon = projection.coordsFromPoint(offsetPoint);
-
-        map.setCenter(offsetLatLon);
+        // 카카오맵에서는 직접적인 offset 설정 대신 panBy를 사용
+        map.setCenter(moveLatLon);
         map.setLevel(zoomLevel);
+
+        // 지도 중심을 약간 아래로 이동하여 빨간 점이 상단 2/3 지점에 오도록 조정
+        setTimeout(() => {
+          const containerHeight = mapContainer.current.offsetHeight;
+          const offsetPixels = containerHeight * 0.15; // 15% 정도 아래로 이동
+          map.panBy(0, offsetPixels);
+        }, 100);
 
         // 빨간 점 마커 추가
         addSelectedLocationMarker(moveLatLon);
