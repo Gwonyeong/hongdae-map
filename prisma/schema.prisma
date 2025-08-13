@@ -21,24 +21,25 @@ model User {
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  
-  accounts Account[]
-  sessions Session[]
-  reviews  Review[]
+
+  accounts  Account[]
+  sessions  Session[]
+  reviews   Review[]
+  feedbacks Feedback[]
 }
 
 model Place {
-  id          Int      @id @default(autoincrement())
-  name        String
-  address     String
-  latitude    Float
-  longitude   Float
-  category    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  id        Int      @id @default(autoincrement())
+  name      String
+  address   String
+  latitude  Float
+  longitude Float
+  category  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   reviews Review[]
-  
+
   @@unique([latitude, longitude, name])
 }
 
@@ -51,13 +52,13 @@ model Review {
   images      String[] // 이미지 URL 배열
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
-  userId  String
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   placeId Int
   place   Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
-  
+
   @@index([placeId])
   @@index([userId])
 }
@@ -97,3 +98,17 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  subject   String // 문의 주제
+  content   String   @db.Text // 상세 내용
+  status    String   @default("pending") // pending, in_progress, resolved
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+}

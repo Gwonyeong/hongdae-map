@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
+import FeedbackModal from "./FeedbackModal";
 
 export default function UserSettingsModal({ isOpen, onClose, session }) {
   const { update } = useSession();
@@ -12,6 +13,7 @@ export default function UserSettingsModal({ isOpen, onClose, session }) {
   const [imagePreview, setImagePreview] = useState(session?.user?.image || "");
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   if (!isOpen) return null;
 
@@ -201,6 +203,49 @@ export default function UserSettingsModal({ isOpen, onClose, session }) {
                       <p className="font-medium text-gray-900">프로필 변경</p>
                       <p className="text-sm text-gray-500">
                         이름과 프로필 사진 수정
+                      </p>
+                    </div>
+                  </div>
+                  <svg
+                    className="w-5 h-5 text-gray-400 group-hover:text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+
+                {/* 다만홍 문의 */}
+                <button
+                  onClick={() => setShowFeedbackModal(true)}
+                  className="w-full p-4 bg-green-50 hover:bg-green-100 rounded-lg text-left transition-colors flex items-center justify-between group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                      <svg
+                        className="w-6 h-6 text-green-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">다만홍 문의</p>
+                      <p className="text-sm text-gray-500">
+                        웹사이트 개선을 위한 피드백
                       </p>
                     </div>
                   </div>
@@ -501,6 +546,13 @@ export default function UserSettingsModal({ isOpen, onClose, session }) {
           </div>
         </div>
       </div>
+
+      {/* 피드백 모달 */}
+      <FeedbackModal
+        isOpen={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+        session={session}
+      />
     </>
   );
 }
